@@ -3,69 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Ghanshyam Ramole - Creative Web & App Developer</title>
+    <meta name="description" content="Portfolio of Ghanshyam Ramole - Creative Web & App Developer specializing in modern web applications and cloud architecture.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- <link rel="stylesheet" href="/style.css">    (delete) -->    
 </head>
 <body>
+    <!-- Preloader -->
+    <div class="preloader" data-preloader>
+        <div class="circle"></div>
+    </div>
 
-                         <!-- nav bar -->
-                         <!--         -->
-                         <!--.........-->
-    <header class="header">
+    <!-- Header -->
+    <header class="header" data-header>
         <nav id="navbar">
-          
-                <a herf = "#" class="head">
-                    <img src="open.png" height="80" width="80" id="logo">
-                </a>
-            <ul>
-              <div class="tail">
-                <li id="padding"><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#skills">Skills</a></li>
-                <li><a href="#contact">Contact</a></li>
-              </div>
+            <a href="#" class="head">
+                <img src="open.png" height="80" width="80" id="logo" alt="Ghanshyam Ramole Portfolio Logo" onerror="this.onerror=null; this.src='https://placehold.co/80x80?text=GR+Logo';">
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <ul class="desktop-nav">
+                <div class="tail">
+                    <li id="padding"><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#portfolio">Portfolio</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </div>
             </ul>
-                      <!--      hidden nav  -->
-                      <div class="container">
-                        <button class="nav-toggle-btn" data-nav-toggler data-nav-toggle-btn aria-label="Toggle menu">
-                          <span class="line line-1"></span>
-                          <span class="line line-2"></span>
-                        </button>
-                  
-                        <nav class="navbar" data-navbar>
-                          <ul class="navbar-list">
-                  
-                            <li>
-                              <a href="#home" class="navbar-link">Home</a>
-                            </li>
-                  
-                            <li>
-                              <a href="#about" class="navbar-link">About</a>
-                            </li>
-                  
-                            <li>
-                              <a href="#portfolio" class="navbar-link">Portfolio</a>
-                            </li>
-                  
-                            <li>
-                              <a href="#skills" class="navbar-link">Skills</a>
-                            </li>
-                  
-                            <li>
-                              <a href="#contact" class="navbar-link">Contact</a>
-                            </li>
-                  
-                          </ul>
-                        </nav>
-                  
-                        <div class="overlay" data-nav-toggler data-overlay></div>
-                  
-                      </div>            
+            
+            <!-- Mobile Navigation Toggle -->
+            <div class="mobile-nav-container">
+                <button class="nav-toggle-btn" data-nav-toggler data-nav-toggle-btn aria-label="Toggle menu">
+                    <span class="line line-1"></span>
+                    <span class="line line-2"></span>
+                </button>
+        
+                <nav class="navbar" data-navbar>
+                    <ul class="navbar-list">
+                        <li><a href="#home" class="navbar-link" data-nav-toggler>Home</a></li>
+                        <li><a href="#about" class="navbar-link" data-nav-toggler>About</a></li>
+                        <li><a href="#portfolio" class="navbar-link" data-nav-toggler>Portfolio</a></li>
+                        <li><a href="#skills" class="navbar-link" data-nav-toggler>Skills</a></li>
+                        <li><a href="#contact" class="navbar-link" data-nav-toggler>Contact</a></li>
+                    </ul>
+                </nav>
+        
+                <div class="overlay" data-nav-toggler data-overlay></div>
+            </div>            
         </nav>
-        <!-- <div class="overlay" data-nav-toggler data-overlay></div>  -->
     </header>
 
     
