@@ -830,6 +830,93 @@ li {
   }
 }
 
+/* ============================= */
+/* RESPONSIVE BREAKPOINTS        */
+/* ============================= */
+
+/* Tablets and below */
+@media (max-width: 992px) {
+  .home__content {
+    grid-template-columns: 1fr; /* Stack content */
+    text-align: center;
+    padding: var(--space-xl);
+  }
+
+  .home__data {
+    text-align: center;
+  }
+
+  .home__description {
+    max-width: 90%;
+  }
+
+  .home__blob {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 768px) {
+  .home__container {
+    padding: 0 var(--space-md);
+  }
+
+  .home__title {
+    font-size: clamp(1.8rem, 6vw, var(--fs-h2));
+  }
+
+  .home__subtitle {
+    font-size: clamp(1rem, 4vw, var(--fs-h4));
+  }
+
+  .home__blob {
+    width: 220px;
+    height: 220px;
+  }
+
+  .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .home__content {
+    padding: var(--space-lg);
+    gap: var(--space-lg);
+  }
+
+  .home__blob {
+    width: 180px;
+    height: 180px;
+  }
+
+  .home__title {
+    font-size: 1.6rem;
+  }
+
+  .home__subtitle {
+    font-size: 1rem;
+  }
+
+  .home__description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .home__social {
+    gap: var(--space-sm);
+  }
+
+  .home__social-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
 
 /*-----------------------------------*\
   #PORTFOLIO SECTION
