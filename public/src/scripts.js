@@ -145,34 +145,40 @@ const initSlider = function (currentSlider) {
   };
 
   /** Touch drag */
-  sliderContainer.addEventListener("touchstart", (e) => {
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    dragOffset = 0;
-    sliderContainer.style.transition = "none";
-  });
+  // TOUCH START
+sliderContainer.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+  isDragging = true;
+  prevTranslate = currentTranslate;
+  sliderContainer.style.transition = "none";
+});
 
-  sliderContainer.addEventListener("touchmove", (e) => {
-    if (!isDragging) return;
-    dragOffset = e.touches[0].clientX - startX;
-    sliderContainer.style.transform = `translateX(${scrollX + dragOffset}px)`;
-  });
+// TOUCH MOVE
+sliderContainer.addEventListener("touchmove", (e) => {
+  if (!isDragging) return;
+  currentX = e.touches[0].clientX;
+  const deltaX = currentX - startX;
+  currentTranslate = prevTranslate + deltaX;
 
-  sliderContainer.addEventListener("touchend", () => {
-    isDragging = false;
+  setSliderPosition(); // no transition for real-time drag
+});
 
-    // if swipe is significant → go next/prev
-    if (Math.abs(dragOffset) > 50) {
-      if (dragOffset < 0 && currentSlidePos < totalSlidableItems) {
-        currentSlidePos++;
-      } else if (dragOffset > 0 && currentSlidePos > 0) {
-        currentSlidePos--;
-      }
-    }
+// TOUCH END
+sliderContainer.addEventListener("touchend", () => {
+  isDragging = false;
 
-    moveSliderItem(true);
-    dragOffset = 0;
-  });
+  // Find nearest slide
+  let slideWidth = sliderContainer.children[0].offsetWidth;
+  currentSlidePos = Math.round(Math.abs(currentTranslate) / slideWidth);
+
+  // clamp between 0 and max slides
+  if (currentSlidePos < 0) currentSlidePos = 0;
+  if (currentSlidePos > totalSlidableItems) currentSlidePos = totalSlidableItems;
+
+  // snap with smooth easing
+  currentTranslate = -sliderContainer.children[currentSlidePos].offsetLeft;
+  setSliderPosition(true);
+});
 
   /** Responsive */
   window.addEventListener("resize", () => {
