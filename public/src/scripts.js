@@ -80,10 +80,10 @@ const initSlider = function (currentSlider) {
   let totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
 
   let currentSlidePos = 0;
-  let scrollX = 0;
-  let isDragging = false;
+  let scrollX = 0; // actual translate position
   let startX = 0;
-  let currentX = 0;
+  let dragOffset = 0;
+  let isDragging = false;
 
   /** MOVE TO EXACT SLIDE */
   const moveSliderItem = (withTransition = true) => {
@@ -155,19 +155,19 @@ const initSlider = function (currentSlider) {
   sliderContainer.addEventListener("touchstart", (e) => {
     isDragging = true;
     startX = e.touches[0].clientX;
+    dragOffset = 0;
     sliderContainer.style.transition = "none";
   });
 
   sliderContainer.addEventListener("touchmove", (e) => {
     if (!isDragging) return;
-    currentX = e.touches[0].clientX - startX;
-    sliderContainer.style.transform = `translateX(${scrollX + currentX}px)`;
+    dragOffset = e.touches[0].clientX - startX;
+    sliderContainer.style.transform = `translateX(${scrollX + dragOffset}px)`;
   });
 
   sliderContainer.addEventListener("touchend", () => {
     isDragging = false;
-    scrollX += currentX;
-    currentX = 0;
+    scrollX += dragOffset;
 
     // clamp boundaries
     const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
@@ -189,6 +189,7 @@ const initSlider = function (currentSlider) {
 };
 
 sliders.forEach(initSlider);
+
 
 
 
