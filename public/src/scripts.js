@@ -72,7 +72,6 @@ window.addEventListener("scroll", function () {
 const sliders = document.querySelectorAll("[data-slider]");
 
 const initSlider = function (currentSlider) {
-
   const sliderContainer = currentSlider.querySelector("[data-slider-container]");
   const sliderPrevBtn = currentSlider.querySelector("[data-slider-prev]");
   const sliderNextBtn = currentSlider.querySelector("[data-slider-next]");
@@ -81,72 +80,121 @@ const initSlider = function (currentSlider) {
   let totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
 
   let currentSlidePos = 0;
+  let isDragging = false;
+  let startX = 0;
+  let currentX = 0;
+  let scrollX = 0; // stores current translate offset
 
-  const moveSliderItem = function () {
+  const moveSliderItem = (withTransition = true) => {
+    if (withTransition) {
+      sliderContainer.style.transition = "transform 0.4s ease";
+    } else {
+      sliderContainer.style.transition = "none";
+    }
     sliderContainer.style.transform = `translateX(-${sliderContainer.children[currentSlidePos].offsetLeft}px)`;
-  }
+    scrollX = -sliderContainer.children[currentSlidePos].offsetLeft;
+  };
 
-  /**
-   * NEXT SLIDE
-   */
-  const slideNext = function () {
-    const slideEnd = currentSlidePos >= totalSlidableItems;
-
-    if (slideEnd) {
+  /** NEXT / PREVIOUS */
+  const slideNext = () => {
+    if (currentSlidePos >= totalSlidableItems) {
       currentSlidePos = 0;
     } else {
       currentSlidePos++;
     }
-
     moveSliderItem();
-  }
+  };
 
-  sliderNextBtn.addEventListener("click", slideNext);
-
-  /**
-   * PREVIOUS SLIDE
-   */
-  const slidePrev = function () {
+  const slidePrev = () => {
     if (currentSlidePos <= 0) {
       currentSlidePos = totalSlidableItems;
     } else {
       currentSlidePos--;
     }
-
     moveSliderItem();
-  }
+  };
 
+  sliderNextBtn.addEventListener("click", slideNext);
   sliderPrevBtn.addEventListener("click", slidePrev);
 
-  const dontHaveExtraItem = totalSlidableItems <= 0;
-  if (dontHaveExtraItem) {
-    sliderNextBtn.style.display = 'none';
-    sliderPrevBtn.style.display = 'none';
+  /** Hide buttons if not needed */
+  if (totalSlidableItems <= 0) {
+    sliderNextBtn.style.display = "none";
+    sliderPrevBtn.style.display = "none";
   }
 
-  /**
-   * slide with [shift + mouse wheel]
-   */
+/** TRACKPAD SCROLL */
+currentSlider.addEventListener("wheel", (event) => {
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+    sliderContainer.style.transition = "none"; // no easing while scrolling
+    scrollX -= event.deltaX;
 
-  currentSlider.addEventListener("wheel", function (event) {
-    if (event.shiftKey && event.deltaY > 0) slideNext();
-    if (event.shiftKey && event.deltaY < 0) slidePrev();
+    // clamp so it cannot scroll outside
+    const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
+    if (scrollX > 0) scrollX = 0;                // left limit
+    if (scrollX < maxScroll) scrollX = maxScroll; // right limit
+
+    sliderContainer.style.transform = `translateX(${scrollX}px)`;
+    event.preventDefault();
+  }
+});
+
+/** SNAP after trackpad gesture ends */
+let wheelTimeout;
+currentSlider.addEventListener("wheel", (event) => {
+  clearTimeout(wheelTimeout);
+  wheelTimeout = setTimeout(() => {
+    // Find nearest child to snap
+    const childOffsets = [...sliderContainer.children].map((c) => -c.offsetLeft);
+    let closest = childOffsets.reduce((prev, curr) =>
+      Math.abs(curr - scrollX) < Math.abs(prev - scrollX) ? curr : prev
+    );
+    currentSlidePos = childOffsets.indexOf(closest);
+    moveSliderItem(true);
+  }, 150); // 150ms after user stops scrolling
+});
+
+
+  /** TOUCH DRAG */
+  sliderContainer.addEventListener("touchstart", (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    sliderContainer.style.transition = "none";
   });
 
-  /**
-   * RESPONSIVE
-   */
+  sliderContainer.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX - startX;
+    sliderContainer.style.transform = `translateX(${scrollX + currentX}px)`;
+  });
 
-  window.addEventListener("resize", function () {
+  sliderContainer.addEventListener("touchend", () => {
+    isDragging = false;
+    scrollX += currentX;
+    currentX = 0;
+
+    // snap to nearest slide
+    const childWidths = [...sliderContainer.children].map((c) => c.offsetLeft);
+    let closest = childWidths.reduce((prev, curr) =>
+      Math.abs(curr + scrollX) < Math.abs(prev + scrollX) ? curr : prev
+    );
+    currentSlidePos = childWidths.indexOf(closest);
+    moveSliderItem(true);
+  });
+
+  /** RESIZE HANDLING */
+  window.addEventListener("resize", () => {
     totalSliderVisibleItems = Number(getComputedStyle(currentSlider).getPropertyValue("--slider-items"));
     totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
-
     moveSliderItem();
   });
 
-}
+  // Initialize position
+  moveSliderItem(false);
+};
 
-for (let i = 0, len = sliders.length; i < len; i++) { initSlider(sliders[i]); }
+sliders.forEach(initSlider);
+
 
 
 
