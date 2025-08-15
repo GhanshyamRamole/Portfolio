@@ -80,19 +80,61 @@ const initSlider = function (currentSlider) {
   let totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
 
   let currentSlidePos = 0;
-  let scrollX = 0; // actual translate position
+  let scrollX = 0; // current translate offset
   let startX = 0;
   let dragOffset = 0;
   let isDragging = false;
 
-  /** MOVE TO EXACT SLIDE */
+  /** Move to exact slide index */
   const moveSliderItem = (withTransition = true) => {
-    sliderContainer.style.transition = withTransition ? "transform 0.4s ease" : "none";
+    sliderContainer.style.transition = withTransition ? "transform 0.35s ease" : "none";
     scrollX = -sliderContainer.children[currentSlidePos].offsetLeft;
     sliderContainer.style.transform = `translateX(${scrollX}px)`;
   };
 
-  /** SNAP TO NEAREST SLIDE */
+  /** Next / Prev */
+  const slideNext = () => {
+    if (currentSlidePos < totalSlidableItems) currentSlidePos++;
+    moveSliderItem(true);
+  };
+
+  const slidePrev = () => {
+    if (currentSlidePos > 0) currentSlidePos--;
+    moveSliderItem(true);
+  };
+
+  sliderNextBtn.addEventListener("click", slideNext);
+  sliderPrevBtn.addEventListener("click", slidePrev);
+
+  /** Hide arrows if not needed */
+  if (totalSlidableItems <= 0) {
+    sliderNextBtn.style.display = "none";
+    sliderPrevBtn.style.display = "none";
+  }
+
+  /** Trackpad scroll (with snap) */
+  let wheelTimeout;
+  currentSlider.addEventListener("wheel", (event) => {
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+      sliderContainer.style.transition = "none";
+      scrollX -= event.deltaX;
+
+      // clamp
+      const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
+      if (scrollX > 0) scrollX = 0;
+      if (scrollX < maxScroll) scrollX = maxScroll;
+
+      sliderContainer.style.transform = `translateX(${scrollX}px)`;
+      event.preventDefault();
+
+      clearTimeout(wheelTimeout);
+      wheelTimeout = setTimeout(() => {
+        snapToNearest();
+      }, 120);
+    }
+  });
+
+  /** Snap logic */
   const snapToNearest = () => {
     const childOffsets = [...sliderContainer.children].map((c) => -c.offsetLeft);
     let closest = childOffsets.reduce((prev, curr) =>
@@ -102,56 +144,7 @@ const initSlider = function (currentSlider) {
     moveSliderItem(true);
   };
 
-  /** NEXT / PREV */
-  const slideNext = () => {
-    if (currentSlidePos >= totalSlidableItems) {
-      currentSlidePos = 0;
-    } else {
-      currentSlidePos++;
-    }
-    moveSliderItem(true);
-  };
-
-  const slidePrev = () => {
-    if (currentSlidePos <= 0) {
-      currentSlidePos = totalSlidableItems;
-    } else {
-      currentSlidePos--;
-    }
-    moveSliderItem(true);
-  };
-
-  sliderNextBtn.addEventListener("click", slideNext);
-  sliderPrevBtn.addEventListener("click", slidePrev);
-
-  /** HIDE ARROWS IF NOT NEEDED */
-  if (totalSlidableItems <= 0) {
-    sliderNextBtn.style.display = "none";
-    sliderPrevBtn.style.display = "none";
-  }
-
-  /** TRACKPAD SCROLL */
-  let wheelTimeout;
-  currentSlider.addEventListener("wheel", (event) => {
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-      sliderContainer.style.transition = "none";
-      scrollX -= event.deltaX;
-
-      // clamp boundaries
-      const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
-      if (scrollX > 0) scrollX = 0;
-      if (scrollX < maxScroll) scrollX = maxScroll;
-
-      sliderContainer.style.transform = `translateX(${scrollX}px)`;
-      event.preventDefault();
-
-      // snap when scrolling stops
-      clearTimeout(wheelTimeout);
-      wheelTimeout = setTimeout(snapToNearest, 150);
-    }
-  });
-
-  /** TOUCH DRAG */
+  /** Touch drag */
   sliderContainer.addEventListener("touchstart", (e) => {
     isDragging = true;
     startX = e.touches[0].clientX;
@@ -167,24 +160,28 @@ const initSlider = function (currentSlider) {
 
   sliderContainer.addEventListener("touchend", () => {
     isDragging = false;
-    scrollX += dragOffset;
 
-    // clamp boundaries
-    const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
-    if (scrollX > 0) scrollX = 0;
-    if (scrollX < maxScroll) scrollX = maxScroll;
+    // if swipe is significant → go next/prev
+    if (Math.abs(dragOffset) > 50) {
+      if (dragOffset < 0 && currentSlidePos < totalSlidableItems) {
+        currentSlidePos++;
+      } else if (dragOffset > 0 && currentSlidePos > 0) {
+        currentSlidePos--;
+      }
+    }
 
-    snapToNearest();
+    moveSliderItem(true);
+    dragOffset = 0;
   });
 
-  /** RESPONSIVE */
+  /** Responsive */
   window.addEventListener("resize", () => {
     totalSliderVisibleItems = Number(getComputedStyle(currentSlider).getPropertyValue("--slider-items"));
     totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
     moveSliderItem(false);
   });
 
-  // Initialize
+  // Init
   moveSliderItem(false);
 };
 
