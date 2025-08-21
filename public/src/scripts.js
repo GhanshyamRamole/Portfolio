@@ -146,22 +146,34 @@ const initSlider = function (currentSlider) {
 
   /** Touch drag */
   // TOUCH START
+// TOUCH START
 sliderContainer.addEventListener("touchstart", (e) => {
+  if (e.touches.length > 1) return;      // ignore multi-touch
   startX = e.touches[0].clientX;
   isDragging = true;
   prevTranslate = currentTranslate;
   sliderContainer.style.transition = "none";
-});
+}, { passive: true });
 
 // TOUCH MOVE
 sliderContainer.addEventListener("touchmove", (e) => {
   if (!isDragging) return;
+  e.preventDefault();                      // allow horizontal drag instead of page scroll
   currentX = e.touches[0].clientX;
   const deltaX = currentX - startX;
   currentTranslate = prevTranslate + deltaX;
+  clampTranslate();
+  setSliderPosition(false);                // realtime drag
+}, { passive: false });
 
-  setSliderPosition(); // no transition for real-time drag
-});
+// TOUCH END / CANCEL
+const endDrag = () => {
+  if (!isDragging) return;
+  isDragging = false;
+  snapToNearest();                         // smooth snap
+};
+sliderContainer.addEventListener("touchend", endDrag);
+sliderContainer.addEventListener("touchcancel", endDrag);
 
 // TOUCH END
 sliderContainer.addEventListener("touchend", () => {
