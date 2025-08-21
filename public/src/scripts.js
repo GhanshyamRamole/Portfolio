@@ -170,10 +170,23 @@ const initSlider = function (currentSlider) {
   }, { passive: false });
 
   const endDrag = () => {
-    if (!isDragging) return;
-    isDragging = false;
-    snapToNearest();
-  };
+  if (!isDragging) return;
+  isDragging = false;
+
+  const slideWidth = sliderContainer.children[0].offsetWidth;
+  const movedBy = scrollX - dragStartScrollX; // negative = left, positive = right
+
+  if (movedBy < -slideWidth / 3 && currentSlidePos < totalSlidableItems) {
+    // swiped left → next slide
+    currentSlidePos++;
+  } else if (movedBy > slideWidth / 3 && currentSlidePos > 0) {
+    // swiped right → prev slide
+    currentSlidePos--;
+  }
+
+  moveSliderItem(true); // snap to the decided slide
+};
+
   sliderContainer.addEventListener("touchend", endDrag);
   sliderContainer.addEventListener("touchcancel", endDrag);
 
