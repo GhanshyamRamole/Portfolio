@@ -80,10 +80,11 @@ const initSlider = function (currentSlider) {
   let totalSlidableItems = sliderContainer.childElementCount - totalSliderVisibleItems;
 
   let currentSlidePos = 0;
-  let scrollX = 0; // current translate offset
+  let scrollX = 0; // translate offset
   let startX = 0;
-  let dragOffset = 0;
+  let currentX = 0;
   let isDragging = false;
+  let dragStartScrollX = 0;
 
   /** Move to exact slide index */
   const moveSliderItem = (withTransition = true) => {
@@ -112,7 +113,7 @@ const initSlider = function (currentSlider) {
     sliderPrevBtn.style.display = "none";
   }
 
-  /** Trackpad scroll (with snap) */
+  /** Trackpad / Mouse wheel scroll (snap) */
   let wheelTimeout;
   currentSlider.addEventListener("wheel", (event) => {
     if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
@@ -132,7 +133,7 @@ const initSlider = function (currentSlider) {
         snapToNearest();
       }, 120);
     }
-  });
+  }, { passive: false });
 
   /** Snap logic */
   const snapToNearest = () => {
@@ -145,52 +146,36 @@ const initSlider = function (currentSlider) {
   };
 
   /** Touch drag */
-  // TOUCH START
-// TOUCH START
-sliderContainer.addEventListener("touchstart", (e) => {
-  if (e.touches.length > 1) return;      // ignore multi-touch
-  startX = e.touches[0].clientX;
-  isDragging = true;
-  prevTranslate = currentTranslate;
-  sliderContainer.style.transition = "none";
-}, { passive: true });
+  sliderContainer.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 1) return; // ignore multi-touch
+    startX = e.touches[0].clientX;
+    dragStartScrollX = scrollX;
+    isDragging = true;
+    sliderContainer.style.transition = "none";
+  }, { passive: true });
 
-// TOUCH MOVE
-sliderContainer.addEventListener("touchmove", (e) => {
-  if (!isDragging) return;
-  e.preventDefault();                      // allow horizontal drag instead of page scroll
-  currentX = e.touches[0].clientX;
-  const deltaX = currentX - startX;
-  currentTranslate = prevTranslate + deltaX;
-  clampTranslate();
-  setSliderPosition(false);                // realtime drag
-}, { passive: false });
+  sliderContainer.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    currentX = e.touches[0].clientX;
+    const deltaX = currentX - startX;
+    scrollX = dragStartScrollX + deltaX;
 
-// TOUCH END / CANCEL
-const endDrag = () => {
-  if (!isDragging) return;
-  isDragging = false;
-  snapToNearest();                         // smooth snap
-};
-sliderContainer.addEventListener("touchend", endDrag);
-sliderContainer.addEventListener("touchcancel", endDrag);
+    // clamp
+    const maxScroll = -(sliderContainer.scrollWidth - currentSlider.clientWidth);
+    if (scrollX > 0) scrollX = 0;
+    if (scrollX < maxScroll) scrollX = maxScroll;
 
-// TOUCH END
-sliderContainer.addEventListener("touchend", () => {
-  isDragging = false;
+    sliderContainer.style.transform = `translateX(${scrollX}px)`;
+  }, { passive: false });
 
-  // Find nearest slide
-  let slideWidth = sliderContainer.children[0].offsetWidth;
-  currentSlidePos = Math.round(Math.abs(currentTranslate) / slideWidth);
-
-  // clamp between 0 and max slides
-  if (currentSlidePos < 0) currentSlidePos = 0;
-  if (currentSlidePos > totalSlidableItems) currentSlidePos = totalSlidableItems;
-
-  // snap with smooth easing
-  currentTranslate = -sliderContainer.children[currentSlidePos].offsetLeft;
-  setSliderPosition(true);
-});
+  const endDrag = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    snapToNearest();
+  };
+  sliderContainer.addEventListener("touchend", endDrag);
+  sliderContainer.addEventListener("touchcancel", endDrag);
 
   /** Responsive */
   window.addEventListener("resize", () => {
@@ -204,7 +189,6 @@ sliderContainer.addEventListener("touchend", () => {
 };
 
 sliders.forEach(initSlider);
-
 
 
 
