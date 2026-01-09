@@ -1,13 +1,13 @@
-# Use the official Nginx image as the base image
-FROM nginx:latest
-
+# Stage 1: Build frontend
+FROM node:18 AS builder
 WORKDIR /app
-# Copy your custom HTML content into the Nginx web root directory
-# Ensure 'html' directory exists in the same location as your Dockerfile and contains your static files
-COPY . /usr/share/nginx/html/
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
 
-# Expose port 80 (the default HTTP port for Nginx)
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
-
-# Command to run Nginx when the container starts
 CMD ["nginx", "-g", "daemon off;"]
